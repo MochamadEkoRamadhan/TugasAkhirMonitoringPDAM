@@ -2,8 +2,8 @@
 #include <ESPAsyncWebServer.h>
 
 // WiFi credentials
-const char* ssid = "FITRI";
-const char* password = "fitri2008";
+const char* ssid = "Warkop Santahoer";
+const char* password = "vespa1234";
 
 // Pin sensor dan LED
 #define SENSOR  5
@@ -80,12 +80,18 @@ void setup() {
     html += ".card p { margin: 0.5rem 0; font-size: 1.2rem; color: #333; font-weight: 400; }";
     html += "canvas { max-width: 100%; margin-top: 20px; }";
     html += ".card h2 i { margin-right: 10px; }";
+    html += "@media (max-width: 600px) {";
+    html += "  h1 { font-size: 1.5rem; padding: 0.8rem; }";
+    html += "  .card { padding: 1rem; }";
+    html += "  .card h2 { font-size: 1.5rem; }";
+    html += "  .card p { font-size: 1rem; }";
+    html += "  .logo-container img { height: 40px; }";
+    html += "}";
     html += "</style>";
     html += "</head>";
     html += "<body>";
     html += "<h1>";
     html += "<div class='logo-container'><img src='https://i0.wp.com/www.hpi.or.id/wp-content/uploads/2021/08/Logo-Polinema.png?ssl=1' alt='Polinema Logo'> Monitoring PDAM</div>";
-    // Tambahkan logo PDAM di sini
     html += "<img src='https://industriinvilonsagita.com/wp-content/uploads/2024/05/1561962686-1.png' alt='PDAM Logo' style='height: 50px; margin-left: 20px;'>";
     html += "</h1>";
     html += "<div class='container'>";
@@ -119,13 +125,7 @@ void setup() {
     html += "            tension: 0.3";
     html += "        }]";
     html += "    },";
-    html += "    options: {";
-    html += "        responsive: true,";
-    html += "        scales: {";
-    html += "            x: { title: { display: true, text: 'Detik Terakhir' } },";
-    html += "            y: { title: { display: true, text: 'Pemakaian Air (L/min)' } }";
-    html += "        }";
-    html += "    }";
+    html += "    options: { responsive: true }";
     html += "});";
     html += "setInterval(() => {";
     html += "    fetch('/data').then(response => response.json()).then(data => {";
