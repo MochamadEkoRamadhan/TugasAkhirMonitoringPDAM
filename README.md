@@ -1,0 +1,1 @@
+Tampilan Responsive pada Smartphone
