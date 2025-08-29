@@ -1,0 +1,87 @@
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Data");
+  var timestamp = new Date();
+  var flowRate = parseFloat(e.parameter.flowRate);
+  var totalLiters = parseFloat(e.parameter.totalLiters);
+
+  // Simpan data ke sheet "Data"
+  sheet.appendRow([timestamp, flowRate, totalLiters]);
+
+  // Perbarui ringkasan harian dan bulanan
+  updateDailySummary();
+  updateMonthlySummary();
+
+  return ContentService.createTextOutput("Data diterima dan diproses.");
+}
+
+function updateDailySummary() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var dataSheet = ss.getSheetByName("Data");
+  var summarySheet = ss.getSheetByName("Ringkasan Harian") || ss.insertSheet("Ringkasan Harian");
+
+  var data = dataSheet.getDataRange().getValues();
+  var lastEntryPerDay = {};
+
+  for (var i = 1; i < data.length; i++) {
+    var timestamp = new Date(data[i][0]);
+    var dateStr = Utilities.formatDate(timestamp, Session.getScriptTimeZone(), "yyyy-MM-dd");
+
+    if (!lastEntryPerDay[dateStr] || timestamp > new Date(lastEntryPerDay[dateStr].timestamp)) {
+      lastEntryPerDay[dateStr] = {
+        timestamp: timestamp,
+        volume: data[i][2]
+      };
+    }
+  }
+
+  summarySheet.clear();
+  summarySheet.appendRow(["Tanggal", "Volume Terakhir (L)", "Waktu"]);
+
+  var sortedDates = Object.keys(lastEntryPerDay).sort();
+  sortedDates.forEach(function(date) {
+    var entry = lastEntryPerDay[date];
+    summarySheet.appendRow([
+      date,
+      entry.volume,
+      Utilities.formatDate(entry.timestamp, Session.getScriptTimeZone(), "HH:mm:ss")
+    ]);
+  });
+}
+
+function updateMonthlySummary() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var dataSheet = ss.getSheetByName("Data");
+  var summarySheet = ss.getSheetByName("Ringkasan Bulanan") || ss.insertSheet("Ringkasan Bulanan");
+
+  var data = dataSheet.getDataRange().getValues();
+  var lastEntryPerMonth = {};
+
+  for (var i = 1; i < data.length; i++) {
+    var timestamp = new Date(data[i][0]);
+    var dateStr = Utilities.formatDate(timestamp, Session.getScriptTimeZone(), "yyyy-MM-dd");
+    var monthStr = Utilities.formatDate(timestamp, Session.getScriptTimeZone(), "yyyy-MM");
+
+    // Simpan data terakhir dari hari terakhir di bulan itu
+    if (!lastEntryPerMonth[monthStr] || timestamp > new Date(lastEntryPerMonth[monthStr].timestamp)) {
+      lastEntryPerMonth[monthStr] = {
+        timestamp: timestamp,
+        dateStr: dateStr,
+        volume: data[i][2]
+      };
+    }
+  }
+
+  summarySheet.clear();
+  summarySheet.appendRow(["Bulan", "Tanggal Terakhir", "Volume Terakhir (L)", "Waktu"]);
+
+  var keys = Object.keys(lastEntryPerMonth).sort();
+  keys.forEach(function(key) {
+    var entry = lastEntryPerMonth[key];
+    summarySheet.appendRow([
+      key,
+      entry.dateStr,
+      entry.volume,
+      Utilities.formatDate(entry.timestamp, Session.getScriptTimeZone(), "HH:mm:ss")
+    ]);
+  });
+}
