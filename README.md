@@ -1,1 +1,1 @@
-Tampilan Responsive pada Smartphone
+Program berfungsi dengan sangat baik.
